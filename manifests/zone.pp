@@ -79,6 +79,20 @@ define bind::zone(
 
   $bool_absent=any2bool($absent)
 
+  if $type == 'master' {
+    # Checks
+    if $masters == '' {
+      fail('$masters attribute not set')
+    }
+    # Variables
+    $real_file = "${bind::config_dir}/zone-${name}"
+    $primary_master = $masters[0]
+    $dotted_email = regsubst($email, '@', '.', 'G')
+    $serial = '@@serial@@'
+  } else {
+    $real_file = false
+  }
+
   $manage_file_source = $source ? {
     ''        => undef,
     default   => $source,
@@ -110,31 +124,26 @@ define bind::zone(
 
   # Main part
   include bind
-  concat::fragment { "bind_zone_${name}":
-    ensure  => $manage_file,
-    target  => $bind::config_file,
-    order   => "51-${view}",
-    mode    => $bind::config_file_mode,
-    owner   => $bind::config_file_owner,
-    group   => $bind::config_file_group,
-    source  => $manage_file_source,
-    content => $manage_file_content,
-    audit   => $bind::manage_audit,
-    noop    => $bind::bool_noops,
-  }
-  if $type == 'master' and ($manage_file_source or $manage_file_content) {
-    # More checks
-    if $masters == '' {
-      fail('$masters attribute not set')
+  include bind::concat_base
+
+  if $bind::manage_file != 'absent' {
+    concat::fragment { "bind_zone_${name}":
+      ensure  => $manage_file,
+      target  => $bind::config_file,
+      order   => "51-${view}-2",
+      mode    => $bind::config_file_mode,
+      owner   => $bind::config_file_owner,
+      group   => $bind::config_file_group,
+      source  => $manage_file_source,
+      content => $manage_file_content,
+      audit   => $bind::manage_audit,
+      noop    => $bind::bool_noops,
     }
-    # Automatic vars
-    $file = "${bind::config_dir}/zone-${name}"
-    $primary_master = $masters[0]
-    $dotted_email = regsubst($email, '@', '.', 'G')
-    $serial = '@@serial@@'
+  }
+  if $type == 'master' and ($zonefile_manage_file_source or $zonefile_manage_file_content) {
     file { "bind_zonefile-${name}":
       ensure  => $manage_file,
-      path    => $file,
+      path    => $real_file,
       mode    => $bind::config_file_mode,
       owner   => $bind::config_file_owner,
       group   => $bind::config_file_group,

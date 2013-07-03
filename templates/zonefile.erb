@@ -1,7 +1,7 @@
 $TTL <%= @ttl %>
 
-@ IN SOA <%= @primary_master %> <%= @dotted_email %>. (
-          <%= @serial %> ; serial number
+@ IN SOA <%= primary_master %> <%= dotted_email %>. (
+          <%= serial %> ; serial number
           <%= @refresh %> ; refresh
           <%= @retry %> ; retry
           <%= @expire %> ; expire
@@ -9,11 +9,11 @@ $TTL <%= @ttl %>
         )
 
 <% [@masters].flatten.each do |master| -%>
-@ IN NS <%= @master %>.
+@ IN NS <%= master %>.
 <% end -%>
 
 <% scope.compiler.catalog.vertices.each do |resource| -%>
-<% if resource.type == "Bind::Record" and resource[:zone] == @zonename and resource[:view] == @view -%>
+<% if (resource.type == "Bind::Record") and (resource[:zonename] == @zonename) and (resource[:view] == @view) -%>
 <%= [resource[:lines]].flatten.join("\n") %>
-<% end %>
+<% end -%>
 <% end -%>
