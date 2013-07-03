@@ -341,21 +341,6 @@ class bind (
     noop       => $bind::bool_noops,
   }
 
-  file { 'bind.conf':
-    ensure  => $bind::manage_file,
-    path    => $bind::config_file,
-    mode    => $bind::config_file_mode,
-    owner   => $bind::config_file_owner,
-    group   => $bind::config_file_group,
-    require => Package[$bind::package],
-    notify  => $bind::manage_service_autorestart,
-    source  => $bind::manage_file_source,
-    content => $bind::manage_file_content,
-    replace => $bind::manage_file_replace,
-    audit   => $bind::manage_audit,
-    noop    => $bind::bool_noops,
-  }
-
   # The whole bind configuration directory can be recursively overriden
   if $bind::source_dir {
     file { 'bind.dir':
@@ -371,6 +356,33 @@ class bind (
       audit   => $bind::manage_audit,
       noop    => $bind::bool_noops,
     }
+  } else {
+
+    include concat::setup
+
+    concat { $bind::config_file:
+      ensure  => $bind::manage_file,
+      mode    => $bind::config_file_mode,
+      owner   => $bind::config_file_owner,
+      group   => $bind::config_file_group,
+      require => Package[$bind::package],
+      notify  => $bind::manage_service_autorestart,
+      audit   => $bind::manage_audit,
+      noop    => $bind::bool_noops,
+    }
+    concat::fragment { 'bind_head':
+      ensure  => $bind::manage_file,
+      target  => $bind::config_file,
+      order   => '01',
+      mode    => $bind::config_file_mode,
+      owner   => $bind::config_file_owner,
+      group   => $bind::config_file_group,
+      source  => $bind::manage_file_source,
+      content => $bind::manage_file_content,
+      audit   => $bind::manage_audit,
+      noop    => $bind::bool_noops,
+    }
+
   }
 
 
