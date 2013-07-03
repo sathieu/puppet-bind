@@ -2,7 +2,7 @@
 
 This is a Puppet module for bind based on the second generation layout ("NextGen") of Example42 Puppet Modules.
 
-Made by Alessandro Franceschi / Lab42
+Made by Mathieu Parent, based on Example42 template from Alessandro Franceschi / Lab42
 
 Official site: http://www.example42.com
 

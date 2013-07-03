@@ -1,7 +1,7 @@
 name 'example42-bind'
-version '2.0.10'
+version '2.0'
 
-author 'Alessandro Franceschi'
+author 'Mathieu Parent'
 license 'Apache2'
 project_page 'http://www.example42.com'
 source 'https://github.com/example42/puppet-bind'
