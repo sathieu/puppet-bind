@@ -17,11 +17,13 @@ class bind::params {
   ### Application related parameters
 
   $package = $::operatingsystem ? {
-    default => 'bind',
+    /(?i:Debian|Ubuntu|Mint)/ => 'bind9',
+    default                   => 'bind',
   }
 
   $service = $::operatingsystem ? {
-    default => 'bind',
+    /(?i:Debian|Ubuntu|Mint)/ => 'bind9',
+    default                   => 'named',
   }
 
   $service_status = $::operatingsystem ? {
@@ -29,7 +31,7 @@ class bind::params {
   }
 
   $process = $::operatingsystem ? {
-    default => 'bind',
+    default => 'named',
   }
 
   $process_args = $::operatingsystem ? {
@@ -45,7 +47,8 @@ class bind::params {
   }
 
   $config_file = $::operatingsystem ? {
-    default => '/etc/bind/bind.conf',
+    /(?i:Debian|Ubuntu|Mint)/ => '/etc/bind/named.conf.local',
+    default                   => '/etc/named.conf',
   }
 
   $config_file_mode = $::operatingsystem ? {
@@ -57,20 +60,23 @@ class bind::params {
   }
 
   $config_file_group = $::operatingsystem ? {
-    default => 'root',
+    /(?i:Debian|Ubuntu|Mint)/ => 'bind',
+    default                   => 'root',
   }
 
   $config_file_init = $::operatingsystem ? {
-    /(?i:Debian|Ubuntu|Mint)/ => '/etc/default/bind',
-    default                   => '/etc/sysconfig/bind',
+    /(?i:Debian|Ubuntu|Mint)/ => '/etc/default/bind9',
+    default                   => '/etc/sysconfig/named',
   }
 
   $pid_file = $::operatingsystem ? {
-    default => '/var/run/bind.pid',
+    /(?i:Debian|Ubuntu|Mint)/ => '/var/run/named/named.pid',
+    default                   => '/var/run/named.pid',
   }
 
   $data_dir = $::operatingsystem ? {
-    default => '/etc/bind',
+    /(?i:Debian|Ubuntu|Mint)/ => '/var/cache/bind',
+    default                   => '/var/bind',
   }
 
   $log_dir = $::operatingsystem ? {
@@ -81,8 +87,8 @@ class bind::params {
     default => '/var/log/bind/bind.log',
   }
 
-  $port = '42'
-  $protocol = 'tcp'
+  $port = '53'
+  $protocol = '' # tcp and udp
 
   # General Settings
   $my_class = ''
