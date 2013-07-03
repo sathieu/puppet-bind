@@ -1,0 +1,19 @@
+zone "<%= @zonename %>" {
+    type <%= @type %>;
+<% if @file -%>
+    file <%= @file %>
+<% end -%>
+<% options.sort_by {|k, v| k}.each do |k, v| -%>
+<% if [
+    'allow-query', 'allow-query-on', 'allow-transfer', 'allow-update', 'allow-update-forwarding',
+    'also-notify', 'forwarders', 'masters', 'server-names'
+  ].include?(@k) -%>
+    <%= @k %> {
+<% v.each do |v2| -%>
+        <%= @v2 %>;
+<% end -%>
+    }
+<% else -%>
+    <%= @k %> <% v %>;
+<% end -%>
+<% end -%>
