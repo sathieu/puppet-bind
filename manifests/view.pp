@@ -35,9 +35,13 @@ define bind::view(
     default => 'present',
   }
 
+  # Checks
+  if !$bind::bool_manage_config_file_local {
+    fail('Unable to manage view files if $bind::manage_config_file_local is not true')
+  }
+
   # Main part
   include bind
-  include bind::concat_base
 
   if $bind::manage_file != 'absent' {
     # before zones
