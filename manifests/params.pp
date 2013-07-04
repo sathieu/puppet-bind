@@ -91,6 +91,8 @@ class bind::params {
     default                   => '/etc/sysconfig/named',
   }
 
+  $create_default_view = true
+
   $pid_file = $::operatingsystem ? {
     /(?i:Debian|Ubuntu|Mint)/ => '/var/run/named/named.pid',
     default                   => '/var/run/named.pid',

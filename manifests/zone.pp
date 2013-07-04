@@ -10,7 +10,7 @@
 #
 # [*view*]
 #   Zone view.
-#   Only usefull on multiview.
+#   Default: zzz_default (default view, created if $bind::create_default_view is true)
 #
 # [*type*]
 #   Sets the zone type (master | slave | hint | stub | static-stub | forward | redirect | delegation-only).
@@ -60,7 +60,7 @@
 #
 define bind::zone(
   $zonename          = $name,
-  $view              = '',
+  $view              = 'zzz_default',
   $type              = 'master',
   $source            = '',
   $template          = 'bind/zone.erb',

@@ -185,6 +185,10 @@
 # [*config_file_init*]
 #   Path of configuration file sourced by init script
 #
+# [*create_default_view*]
+#   Should the class automatically create the default view (zzz_default)
+#   Default: true
+#
 # [*pid_file*]
 #   Path of pid file. Used by monitor
 #
@@ -252,6 +256,7 @@ class bind (
   $config_file_owner                = params_lookup( 'config_file_owner' ),
   $config_file_group                = params_lookup( 'config_file_group' ),
   $config_file_init                 = params_lookup( 'config_file_init' ),
+  $create_default_view              = params_lookup( 'create_default_view' ),
   $pid_file                         = params_lookup( 'pid_file' ),
   $data_dir                         = params_lookup( 'data_dir' ),
   $log_dir                          = params_lookup( 'log_dir' ),
@@ -274,6 +279,7 @@ class bind (
   $bool_manage_config_file_options = any2bool($manage_config_file_options)
   $bool_manage_config_file_local = any2bool($manage_config_file_local)
   $bool_manage_config_file_default_zones = any2bool($manage_config_file_default_zones)
+  $bool_create_default_view = any2bool($create_default_view)
 
   ### Definition of some variables used in the module
   $manage_package = $bind::bool_absent ? {
@@ -368,6 +374,14 @@ class bind (
   }
 
   include bind::config_files
+  if $bind::bool_create_default_view and $bind::bool_manage_config_file_local {
+    bind::view {
+      'zzz_default':
+        match_clients        => 'any',
+        match_destinations   => 'any',
+        match_recursive_only => false;
+    }
+  }
 
   ### Include custom class if $my_class is set
   if $bind::my_class {
