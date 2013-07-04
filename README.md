@@ -21,34 +21,105 @@ For detailed info about the logic and usage patterns of Example42 modules check 
 
         class { 'bind': }
 
-* Install a specific version of bind package
+* This module implements most of the usual example42 parameters (version,
+  disable, absent, audit_only, noops, ...)
 
-        class { 'bind':
-          version => '1.0.1',
+* By default, the configuration in split in several files :
+  * named.conf: main configuration file, loading named.conf.options and named.conf.local
+  * named.conf.options: the 'options' statement
+  * named.conf.local: views and zone
+
+* You can set bind options:
+
+        class {
+          'bind':
+            options             => {
+              'dnssec-validation' => 'auto',
+              'auth-nxdomain'     =>  'no',
+              'listen-on-v6'      => [ 'any' ],
+            };
         }
 
-* Disable bind service.
 
-        class { 'bind':
-          disable => true
+## USAGE - Views and zones
+
+* By default, a view named zzz_default is created. To disable this feature:
+
+        class {
+          'bind':
+            create_default_view => false;
         }
 
-* Remove bind package
+* A complete example with some views, zones and record:
 
-        class { 'bind':
-          absent => true
+        # We create our own views:
+        class {
+          'bind':
+            create_default_view => false,
+            forwarders          => [
+              '10.2.3.4',
+              '10.3.4.5',
+            ];
         }
 
-* Enable auditing without without making changes on existing bind configuration *files*
-
-        class { 'bind':
-          audit_only => true
+        # A private and a public view (mind sort order!)
+        bind::view {
+          'private':
+            match_clients        => '10.0.0.0/8',
+            match_destinations   => 'any',
+            match_recursive_only => false,
+        }
+        bind::view {
+          'zz_public':
+            match_clients        => 'any',
+            match_destinations   => 'any',
+            match_recursive_only => false,
         }
 
-* Module dry-run: Do not make any change on *all* the resources provided by the module
+        # Use the 'exported resource' template:
+        Bind::Zone {
+          zonefile_template => 'bind/zonefile.erb',
+        }
 
-        class { 'bind':
-          noops => true
+        bind::zone {
+          'priv_example.org':
+            zonename => 'example.org',
+            view     => 'private',
+            masters  => [
+              'ns1.example.org',
+              'ns2.example.com',
+              'ns3.example.com',
+            ],
+            options  => {
+              'allow-transfer' => [ '10.2.3.4', '10.3.4.5' ],
+              'allow-query'    => 'any',
+            },
+          'pub_example.org':
+            zonename => 'example.org',
+            view     => 'zz_public',
+            masters  => [
+              'ns1.example.org',
+              'ns2.example.com',
+              'ns3.example.com',
+            ],
+            options  => {
+              'allow-transfer' => [ '10.2.3.4', '10.3.4.5' ],
+              'allow-query'    => 'any',
+            },
+        }
+
+        Bind::Record {
+          zonename => 'example.org',
+          view     => 'zz_public',
+        }
+        @@bind::record {
+          'pub_example.org_mx':
+            lines    => '@ IN MX 10 smtp1';
+          'pub_example.org_somehosts':
+            lines    => [
+              'ns1   IN A 10.1.2.3',
+              'stmp1 IN A 10.9.8.7',
+            ]
         }
 
 
