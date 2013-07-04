@@ -18,18 +18,6 @@
 #   If defined, bind main config file will have the param: source => $source
 #   Can be defined also by the (top scope) variable $bind_source
 #
-# [*source_dir*]
-#   If defined, the whole bind configuration directory content is retrieved
-#   recursively from the specified source
-#   (source => $source_dir , recurse => true)
-#   Can be defined also by the (top scope) variable $bind_source_dir
-#
-# [*source_dir_purge*]
-#   If set to true (default false) the existing configuration directory is
-#   mirrored with the content retrieved from source_dir
-#   (source => $source_dir , recurse => true , purge => true)
-#   Can be defined also by the (top scope) variable $bind_source_dir_purge
-#
 # [*template*]
 #   Sets the path to the template to use as content for main configuration file
 #   If defined, bind main config file has: content => content("$template")
@@ -202,8 +190,6 @@
 class bind (
   $my_class                  = params_lookup( 'my_class' ),
   $source                    = params_lookup( 'source' ),
-  $source_dir                = params_lookup( 'source_dir' ),
-  $source_dir_purge          = params_lookup( 'source_dir_purge' ),
   $template                  = params_lookup( 'template' ),
   $service_autorestart       = params_lookup( 'service_autorestart' , 'global' ),
   $options                   = params_lookup( 'options' ),
@@ -246,7 +232,6 @@ class bind (
   $protocol                  = params_lookup( 'protocol' )
   ) inherits bind::params {
 
-  $bool_source_dir_purge=any2bool($source_dir_purge)
   $bool_service_autorestart=any2bool($service_autorestart)
   $bool_absent=any2bool($absent)
   $bool_disable=any2bool($disable)
@@ -344,40 +329,20 @@ class bind (
     noop       => $bind::bool_noops,
   }
 
-  # The whole bind configuration directory can be recursively overriden
-  if $bind::source_dir {
-    file { 'bind.dir':
-      ensure  => directory,
-      path    => $bind::config_dir,
+  if $bind::manage_file_source or $bind::manage_file_content {
+    include bind::concat_base
+  }
+  if $bind::manage_file == 'absent' {
+    file { $bind::config_file_local:
+      ensure  => $bind::manage_file,
+      path    => $bind::config_file_local,
       require => Package[$bind::package],
       notify  => $bind::manage_service_autorestart,
-      source  => $bind::source_dir,
-      recurse => true,
-      purge   => $bind::bool_source_dir_purge,
-      force   => $bind::bool_source_dir_purge,
-      replace => $bind::manage_file_replace,
       audit   => $bind::manage_audit,
       noop    => $bind::bool_noops,
     }
-  } else {
-
-    if $bind::manage_file_source or $bind::manage_file_content {
-      include bind::concat_base
-    }
-    if $bind::manage_file == 'absent' {
-      file { $bind::config_file_local:
-        ensure  => $bind::manage_file,
-        path    => $bind::config_file_local,
-        require => Package[$bind::package],
-        notify  => $bind::manage_service_autorestart,
-        audit   => $bind::manage_audit,
-        noop    => $bind::bool_noops,
-      }
-
-    }
 
   }
-
 
   ### Include custom class if $my_class is set
   if $bind::my_class {

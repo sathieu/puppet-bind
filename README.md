@@ -60,13 +60,6 @@ For detailed info about the logic and usage patterns of Example42 modules check 
         }
 
 
-* Use custom source directory for the whole configuration dir
-
-        class { 'bind':
-          source_dir       => 'puppet:///modules/example42/bind/conf/',
-          source_dir_purge => false, # Set to true to purge any existing file not present in $source_dir
-        }
-
 * Use custom template for main config file. Note that template and source arguments are alternative. 
 
         class { 'bind':

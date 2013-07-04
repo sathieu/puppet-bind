@@ -87,13 +87,6 @@ describe 'bind' do
     it { should contain_file('bind.conf').with_source('puppet:///modules/bind/spec') }
   end
 
-  describe 'Test customizations - source_dir' do
-    let(:params) { {:source_dir => "puppet:///modules/bind/dir/spec" , :source_dir_purge => true } }
-    it { should contain_file('bind.dir').with_source('puppet:///modules/bind/dir/spec') }
-    it { should contain_file('bind.dir').with_purge('true') }
-    it { should contain_file('bind.dir').with_force('true') }
-  end
-
   describe 'Test customizations - custom class' do
     let(:params) { {:my_class => "bind::spec" } }
     it { should contain_file('bind.conf').with_content(/rspec.example42.com/) }
