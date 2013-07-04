@@ -129,7 +129,7 @@ define bind::zone(
   if $bind::manage_file != 'absent' {
     concat::fragment { "bind_zone_${name}":
       ensure  => $manage_file,
-      target  => $bind::config_file,
+      target  => $bind::config_file_local,
       order   => "51-${view}-2",
       mode    => $bind::config_file_mode,
       owner   => $bind::config_file_owner,

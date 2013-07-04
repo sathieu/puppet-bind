@@ -2,7 +2,7 @@ class bind::concat_base {
   include concat::setup
 
   if $bind::manage_file != 'absent' {
-    concat { $bind::config_file:
+    concat { $bind::config_file_local:
       mode    => $bind::config_file_mode,
       owner   => $bind::config_file_owner,
       group   => $bind::config_file_group,
@@ -12,7 +12,7 @@ class bind::concat_base {
       noop    => $bind::bool_noops,
     }
     concat::fragment { 'bind_head':
-      target  => $bind::config_file,
+      target  => $bind::config_file_local,
       order   => '01',
       mode    => $bind::config_file_mode,
       owner   => $bind::config_file_owner,

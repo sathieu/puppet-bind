@@ -43,7 +43,7 @@ define bind::view(
     # before zones
     concat::fragment { "bind_view_${name}":
       ensure  => $manage_file,
-      target  => $bind::config_file,
+      target  => $bind::config_file_local,
       order   => "51-${name}-1",
       mode    => $bind::config_file_mode,
       owner   => $bind::config_file_owner,
@@ -55,7 +55,7 @@ define bind::view(
     # after zones
     concat::fragment { "bind_view_${name}-end":
       ensure  => $manage_file,
-      target  => $bind::config_file,
+      target  => $bind::config_file_local,
       order   => "51-${name}-3",
       mode    => $bind::config_file_mode,
       owner   => $bind::config_file_owner,
