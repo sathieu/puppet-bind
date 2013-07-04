@@ -49,16 +49,16 @@ class bind::config_files {
       }
     } else {
       include concat::setup
+      concat { $bind::config_file_local:
+        mode    => $bind::config_file_mode,
+        owner   => $bind::config_file_owner,
+        group   => $bind::config_file_group,
+        require => Package[$bind::package],
+        notify  => $bind::manage_service_autorestart,
+        audit   => $bind::manage_audit,
+        noop    => $bind::bool_noops,
+      }
       if $bind::manage_file_local_source or $bind::manage_file_local_content {
-        concat { $bind::config_file_local:
-          mode    => $bind::config_file_mode,
-          owner   => $bind::config_file_owner,
-          group   => $bind::config_file_group,
-          require => Package[$bind::package],
-          notify  => $bind::manage_service_autorestart,
-          audit   => $bind::manage_audit,
-          noop    => $bind::bool_noops,
-        }
         concat::fragment { 'bind_head':
           target  => $bind::config_file_local,
           order   => '01',
