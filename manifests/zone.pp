@@ -121,12 +121,14 @@ define bind::zone(
     'master','slave','hint','stub','static-stub','forward','redirect','delegation-only': {}
     default: {fail("Unknown zone type: ${type}")}
   }
+  if !$bind::bool_manage_config_file_local {
+    fail('Unable to manage zone files if $bind::manage_config_file_local is not true')
+  }
 
   # Main part
   include bind
-  include bind::concat_base
 
-  if $bind::manage_file != 'absent' {
+  if !$bind::bool_absent {
     concat::fragment { "bind_zone_${name}":
       ensure  => $manage_file,
       target  => $bind::config_file_local,

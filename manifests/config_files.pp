@@ -1,7 +1,7 @@
 class bind::config_files {
 
   # named.conf
-  if $bind::manage_config_file_main {
+  if $bind::bool_manage_config_file_main {
     file { 'named.conf':
       ensure  => $bind::manage_file,
       path    => $bind::config_file_main,
@@ -17,7 +17,7 @@ class bind::config_files {
     }
   }
   # named.conf.options
-  if $bind::manage_config_file_options {
+  if $bind::bool_manage_config_file_options {
     file { 'named.conf.options':
       ensure  => $bind::manage_file,
       path    => $bind::config_file_options,
@@ -33,7 +33,7 @@ class bind::config_files {
     }
   }
   # named.conf.local
-  if $bind::manage_config_file_local {
+  if $bind::bool_manage_config_file_local {
     if $bind::bool_bool_absent {
       file { 'named.conf.local':
         ensure  => $bind::manage_file,
@@ -74,7 +74,7 @@ class bind::config_files {
     }
   }
   # named.conf.default-zones
-  if $bind::manage_config_file_default_zones {
+  if $bind::bool_manage_config_file_default_zones {
     file { 'named.conf.default-zones':
       ensure  => $bind::manage_file,
       path    => $bind::config_file_default_zones,

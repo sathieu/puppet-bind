@@ -270,6 +270,10 @@ class bind (
   $bool_debug=any2bool($debug)
   $bool_audit_only=any2bool($audit_only)
   $bool_noops=any2bool($noops)
+  $bool_manage_config_file_main = any2bool($manage_config_file_main)
+  $bool_manage_config_file_options = any2bool($manage_config_file_options)
+  $bool_manage_config_file_local = any2bool($manage_config_file_local)
+  $bool_manage_config_file_default_zones = any2bool($manage_config_file_default_zones)
 
   ### Definition of some variables used in the module
   $manage_package = $bind::bool_absent ? {
