@@ -1,0 +1,8 @@
+; Bind::Host[<%= @name %>]
+<% [@ips].flatten.each do |@ip| -%>
+<%= @hostname %> IN A <%= @ip %>
+<% end -%>
+<% [@cnames].flatten.each do |@cname| -%>
+<%= @cname %> IN CNAME <%= @hostname %>
+<% end -%>
+

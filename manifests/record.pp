@@ -12,12 +12,12 @@
 #
 # [*view*]
 #   Zone view.
-#   Only usefull on multiview.
+#   Default: zzz_default (default view, created if $bind::create_default_view is true)
 #
 define bind::record(
   $zonename,
   $lines,
-  $view = '',
+  $view = 'zzz_default',
 ) {
   # Magic is done in templates/zonefile.erb
 }
