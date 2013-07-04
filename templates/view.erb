@@ -24,4 +24,5 @@ view <%= @name %> {
     <%= k %> <% v %>;
 <% end -%>
 <% end -%>
+    include "<%= scope.lookupvar('bind::config_file_default_zones') %>";
 

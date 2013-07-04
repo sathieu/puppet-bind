@@ -46,24 +46,31 @@ class bind::params {
     default => '/etc/bind',
   }
 
-  $config_file = $::operatingsystem ? {
+  $config_file_main = $::operatingsystem ? {
     /(?i:Debian|Ubuntu|Mint)/ => '/etc/bind/named.conf',
     default                   => '/etc/named.conf',
   }
+  $manage_config_file_main = true
 
-  $config_file_options = $::operatingsystem ? {
-    /(?i:Debian|Ubuntu|Mint)/ => '/etc/bind/named.conf.options',
-    default                   => '/etc/named.conf',
+  $config_file_options = $config_file_main ? {
+    false   => false,
+    default => "${config_file_main}.options",
   }
+  $manage_config_file_options = true
 
-  $config_file_local = $::operatingsystem ? {
-    /(?i:Debian|Ubuntu|Mint)/ => '/etc/bind/named.conf.local',
-    default                   => '/etc/named.conf',
+  $config_file_local = $config_file_main ? {
+    false   => false,
+    default => "${config_file_main}.local",
   }
+  $manage_config_file_local = true
 
-  $config_file_default_zones = $::operatingsystem ? {
-    /(?i:Debian|Ubuntu|Mint)/ => '/etc/bind/named.conf.default-zones',
-    default                   => '/etc/named.conf',
+  $config_file_default_zones = $config_file_main ? {
+    false   => false,
+    default => "${config_file_main}.default-zones",
+  }
+  $manage_config_file_default_zones = $::operatingsystem ? {
+    /(?i:Debian|Ubuntu|Mint)/ => false,
+    default                   => true,
   }
 
   $config_file_mode = $::operatingsystem ? {

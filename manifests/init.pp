@@ -14,15 +14,14 @@
 #   Can be defined also by the (top scope) variable $bind_myclass
 #
 # [*source*]
-#   Sets the content of source parameter for main configuration file
-#   If defined, bind main config file will have the param: source => $source
-#   Can be defined also by the (top scope) variable $bind_source
+#   Sets the content of source parameter for local configuration file
+#   If defined, bind local config file will have the param: source => $source
+#   Note source and template parameters are mutually exclusive: don't use both
 #
 # [*template*]
-#   Sets the path to the template to use as content for main configuration file
-#   If defined, bind main config file has: content => content("$template")
+#   Sets the path to the template to use as content for local configuration file
+#   If defined, bind local config file has: content => content("$template")
 #   Note source and template parameters are mutually exclusive: don't use both
-#   Can be defined also by the (top scope) variable $bind_template
 #
 # [*options*]
 #   An hash of custom options to be used in templates for arbitrary settings.
@@ -146,8 +145,33 @@
 # [*config_dir*]
 #   Main configuration directory. Used by puppi
 #
-# [*config_file*]
-#   Main configuration file path
+# [*config_file_main*]
+#   Main configuration file path (named.conf).
+#
+# [*manage_config_file_main*]
+#   Should the module manage the main config file ?
+#   Default: true.
+#
+# [*config_file_options*]
+#   Options configuration file path (named.conf.options).
+#
+# [*manage_config_file_options*]
+#   Should the module manage the options config file ?
+#   Default: true.
+#
+# [*config_file_local*]
+#   Local configuration file path, containing views and zones (named.conf.local).
+#
+# [*manage_config_file_local*]
+#   Should the module manage the local config file ?
+#   Default: true.
+#
+# [*config_file_default_zones*]
+#   Default zones configuration file path (named.conf.default-zones).
+#
+# [*manage_config_file_default_zones*]
+#   Should the module manage the default zones config file ?
+#   Default: false on Debian and derivatives (as Debian already ship it), true otherwise.
 #
 # [*config_file_mode*]
 #   Main configuration file path mode
@@ -188,49 +212,53 @@
 # See README for usage patterns.
 #
 class bind (
-  $my_class                  = params_lookup( 'my_class' ),
-  $source                    = params_lookup( 'source' ),
-  $template                  = params_lookup( 'template' ),
-  $service_autorestart       = params_lookup( 'service_autorestart' , 'global' ),
-  $options                   = params_lookup( 'options' ),
-  $version                   = params_lookup( 'version' ),
-  $absent                    = params_lookup( 'absent' ),
-  $disable                   = params_lookup( 'disable' ),
-  $disableboot               = params_lookup( 'disableboot' ),
-  $monitor                   = params_lookup( 'monitor' , 'global' ),
-  $monitor_tool              = params_lookup( 'monitor_tool' , 'global' ),
-  $monitor_target            = params_lookup( 'monitor_target' , 'global' ),
-  $puppi                     = params_lookup( 'puppi' , 'global' ),
-  $puppi_helper              = params_lookup( 'puppi_helper' , 'global' ),
-  $firewall                  = params_lookup( 'firewall' , 'global' ),
-  $firewall_tool             = params_lookup( 'firewall_tool' , 'global' ),
-  $firewall_src              = params_lookup( 'firewall_src' , 'global' ),
-  $firewall_dst              = params_lookup( 'firewall_dst' , 'global' ),
-  $debug                     = params_lookup( 'debug' , 'global' ),
-  $audit_only                = params_lookup( 'audit_only' , 'global' ),
-  $noops                     = params_lookup( 'noops' ),
-  $package                   = params_lookup( 'package' ),
-  $service                   = params_lookup( 'service' ),
-  $service_status            = params_lookup( 'service_status' ),
-  $process                   = params_lookup( 'process' ),
-  $process_args              = params_lookup( 'process_args' ),
-  $process_user              = params_lookup( 'process_user' ),
-  $config_dir                = params_lookup( 'config_dir' ),
-  $config_file               = params_lookup( 'config_file' ),
-  $config_file_options       = params_lookup( 'config_file_options' ),
-  $config_file_local         = params_lookup( 'config_file_local' ),
-  $config_file_default_zones = params_lookup( 'config_file_default_zones' ),
-  $config_file_mode          = params_lookup( 'config_file_mode' ),
-  $config_file_owner         = params_lookup( 'config_file_owner' ),
-  $config_file_group         = params_lookup( 'config_file_group' ),
-  $config_file_init          = params_lookup( 'config_file_init' ),
-  $pid_file                  = params_lookup( 'pid_file' ),
-  $data_dir                  = params_lookup( 'data_dir' ),
-  $log_dir                   = params_lookup( 'log_dir' ),
-  $log_file                  = params_lookup( 'log_file' ),
-  $port                      = params_lookup( 'port' ),
-  $protocol                  = params_lookup( 'protocol' )
-  ) inherits bind::params {
+  $my_class                         = params_lookup( 'my_class' ),
+  $source                           = params_lookup( 'source' ),
+  $template                         = params_lookup( 'template' ),
+  $service_autorestart              = params_lookup( 'service_autorestart' , 'global' ),
+  $options                          = params_lookup( 'options' ),
+  $version                          = params_lookup( 'version' ),
+  $absent                           = params_lookup( 'absent' ),
+  $disable                          = params_lookup( 'disable' ),
+  $disableboot                      = params_lookup( 'disableboot' ),
+  $monitor                          = params_lookup( 'monitor' , 'global' ),
+  $monitor_tool                     = params_lookup( 'monitor_tool' , 'global' ),
+  $monitor_target                   = params_lookup( 'monitor_target' , 'global' ),
+  $puppi                            = params_lookup( 'puppi' , 'global' ),
+  $puppi_helper                     = params_lookup( 'puppi_helper' , 'global' ),
+  $firewall                         = params_lookup( 'firewall' , 'global' ),
+  $firewall_tool                    = params_lookup( 'firewall_tool' , 'global' ),
+  $firewall_src                     = params_lookup( 'firewall_src' , 'global' ),
+  $firewall_dst                     = params_lookup( 'firewall_dst' , 'global' ),
+  $debug                            = params_lookup( 'debug' , 'global' ),
+  $audit_only                       = params_lookup( 'audit_only' , 'global' ),
+  $noops                            = params_lookup( 'noops' ),
+  $package                          = params_lookup( 'package' ),
+  $service                          = params_lookup( 'service' ),
+  $service_status                   = params_lookup( 'service_status' ),
+  $process                          = params_lookup( 'process' ),
+  $process_args                     = params_lookup( 'process_args' ),
+  $process_user                     = params_lookup( 'process_user' ),
+  $config_dir                       = params_lookup( 'config_dir' ),
+  $config_file_main                 = params_lookup( 'config_file_main' ),
+  $manage_config_file_main          = params_lookup( 'manage_config_file_main' ),
+  $config_file_options              = params_lookup( 'config_file_options' ),
+  $manage_config_file_options       = params_lookup( 'manage_config_file_options' ),
+  $config_file_local                = params_lookup( 'config_file_local' ),
+  $manage_config_file_local         = params_lookup( 'manage_config_file_local' ),
+  $config_file_default_zones        = params_lookup( 'config_file_default_zones' ),
+  $manage_config_file_default_zones = params_lookup( 'manage_config_file_default_zones' ),
+  $config_file_mode                 = params_lookup( 'config_file_mode' ),
+  $config_file_owner                = params_lookup( 'config_file_owner' ),
+  $config_file_group                = params_lookup( 'config_file_group' ),
+  $config_file_init                 = params_lookup( 'config_file_init' ),
+  $pid_file                         = params_lookup( 'pid_file' ),
+  $data_dir                         = params_lookup( 'data_dir' ),
+  $log_dir                          = params_lookup( 'log_dir' ),
+  $log_file                         = params_lookup( 'log_file' ),
+  $port                             = params_lookup( 'port' ),
+  $protocol                         = params_lookup( 'protocol' )
+) inherits bind::params {
 
   $bool_service_autorestart=any2bool($service_autorestart)
   $bool_absent=any2bool($absent)
@@ -303,15 +331,21 @@ class bind (
     false => true,
   }
 
-  $manage_file_source = $bind::source ? {
+  $manage_file_main_content = template('bind/named.conf')
+
+  $manage_file_local_source = $bind::source ? {
     ''        => undef,
     default   => $bind::source,
   }
 
-  $manage_file_content = $bind::template ? {
+  $manage_file_local_content = $bind::template ? {
     ''        => undef,
     default   => template($bind::template),
   }
+
+  $manage_file_options_content = template('bind/named.conf.options')
+
+  $manage_file_default_zones_content = template('bind/named.conf.default-zones')
 
   ### Managed resources
   package { $bind::package:
@@ -329,20 +363,7 @@ class bind (
     noop       => $bind::bool_noops,
   }
 
-  if $bind::manage_file_source or $bind::manage_file_content {
-    include bind::concat_base
-  }
-  if $bind::manage_file == 'absent' {
-    file { $bind::config_file_local:
-      ensure  => $bind::manage_file,
-      path    => $bind::config_file_local,
-      require => Package[$bind::package],
-      notify  => $bind::manage_service_autorestart,
-      audit   => $bind::manage_audit,
-      noop    => $bind::bool_noops,
-    }
-
-  }
+  include bind::config_files
 
   ### Include custom class if $my_class is set
   if $bind::my_class {
