@@ -127,6 +127,7 @@ define bind::zone(
 
   # Main part
   include bind
+  include bind::scripts
 
   if !$bind::bool_absent {
     concat::fragment { "bind_zone_${name}":
@@ -143,19 +144,24 @@ define bind::zone(
     }
   }
   if $type == 'master' and ($zonefile_manage_file_source or $zonefile_manage_file_content) {
-    file { "bind_zonefile-${name}":
+    file { "bind_zonefile-${name}-noserial":
       ensure  => $manage_file,
-      path    => $real_file,
+      path    => "${real_file}-noserial",
       mode    => $bind::config_file_mode,
       owner   => $bind::config_file_owner,
       group   => $bind::config_file_group,
       source  => $zonefile_manage_file_source,
       content => $zonefile_manage_file_content,
       require => Package[$bind::package],
-      notify  => $bind::manage_service_autorestart,
+      notify  => Exec["bind_zonefile-${name}-setserial"],
       replace => $bind::manage_file_replace,
       audit   => $bind::manage_audit,
       noop    => $bind::bool_noops,
+    }
+    exec { "bind_zonefile-${name}-setserial":
+      command     => "/usr/local/bin/bind-set-serial '${name}' '${real_file}-noserial' '${real_file}'",
+      refreshonly => true,
+      notify      => $bind::manage_service_autorestart,
     }
   }
 }
