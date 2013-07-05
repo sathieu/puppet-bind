@@ -22,7 +22,8 @@ For detailed info about the logic and usage patterns of Example42 modules check 
         class { 'bind': }
 
 * This module implements most of the usual example42 parameters (version,
-  disable, absent, audit_only, noops, ...)
+  disable, absent, audit\_only, noops, source, template, my\_class,
+  puppi\*, monitor\*, firewall\* ...)
 
 * By default, the configuration in split in several files :
   * named.conf: main configuration file, loading named.conf.options and named.conf.local
@@ -43,7 +44,7 @@ For detailed info about the logic and usage patterns of Example42 modules check 
 
 ## USAGE - Views and zones
 
-* By default, a view named zzz_default is created. To disable this feature:
+* By default, a view named zzz\_default is created. To disable this feature:
 
         class {
           'bind':
@@ -121,58 +122,15 @@ For detailed info about the logic and usage patterns of Example42 modules check 
               'stmp1 IN A 10.9.8.7',
             ]
         }
-
-
-## USAGE - Overrides and Customizations
-* Use custom sources for main config file 
-
-        class { 'bind':
-          source => [ "puppet:///modules/example42/bind/bind.conf-${hostname}" , "puppet:///modules/example42/bind/bind.conf" ], 
+        @@bind::host {
+          'priv_ns1.example.org':
+            zonename => 'example.org',
+            view     => 'zz_public',
+            hostname => 'ns1',
+            ips      => [ '192.168.1.2' ],
+            cnames   => [ 'dns1' ],
         }
 
-
-* Use custom template for main config file. Note that template and source arguments are alternative. 
-
-        class { 'bind':
-          template => 'example42/bind/bind.conf.erb',
-        }
-
-* Automatically include a custom subclass
-
-        class { 'bind':
-          my_class => 'example42::my_bind',
-        }
-
-
-## USAGE - Example42 extensions management 
-* Activate puppi (recommended, but disabled by default)
-
-        class { 'bind':
-          puppi    => true,
-        }
-
-* Activate puppi and use a custom puppi_helper template (to be provided separately with a puppi::helper define ) to customize the output of puppi commands 
-
-        class { 'bind':
-          puppi        => true,
-          puppi_helper => 'myhelper', 
-        }
-
-* Activate automatic monitoring (recommended, but disabled by default). This option requires the usage of Example42 monitor and relevant monitor tools modules
-
-        class { 'bind':
-          monitor      => true,
-          monitor_tool => [ 'nagios' , 'monit' , 'munin' ],
-        }
-
-* Activate automatic firewalling. This option requires the usage of Example42 firewall and relevant firewall tools modules
-
-        class { 'bind':       
-          firewall      => true,
-          firewall_tool => 'iptables',
-          firewall_src  => '10.42.0.0/24',
-          firewall_dst  => $ipaddress_eth0,
-        }
 
 
 ## CONTINUOUS TESTING
